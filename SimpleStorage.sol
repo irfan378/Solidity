@@ -15,7 +15,7 @@ People[] public people;//Dynamic Array
 //mapping
 mapping(string => uint256) public nameToFavouriteNumber;
 //Functions
-function store(uint256 _favouriteNumber) public{
+function store(uint256 _favouriteNumber) public virtual{
     favNumber=_favouriteNumber; //public keywoard makes the function Public
     // uint256 testVar=5;
 }
