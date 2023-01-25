@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "./PriceConverter.sol";
 contract FundMe{
+    using PriceConverter for uint256;
+    uint256 public minimumUsd=50*1e18;
+    address[] public funders; // Creating an Array of funders
+    mapping(address=>uint256) public addressToAmountFunded;// mapping the funders to the amount they sent
     function fund() public  payable{
-        require(msg.value > 1e18,"Didn't Send enough"); //We want value to be greater than 1 eth
+       // require(getConversionRate(msg.value) > 1e18,"Didn't Send enough"); //We want value to be greater than 50 USD
+        require(msg.value.getConversionRate() > 1e18,"Didn't Send enough"); // when using library
+        funders.push(msg.sender);//pushing the funders to the array
+        addressToAmountFunded[msg.sender]=msg.value;
+
     }
-    function getPrice() public view returns(uint256){
-        // Address 0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
-        AggregatorV3Interface priceFeed=AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
-        (,int256 price,,,)=priceFeed.latestRoundData();
-        return uint256(price * 1e10); //1**10=10000000000
-    }
+   
+
    
 }
