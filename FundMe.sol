@@ -6,6 +6,10 @@ contract FundMe{
     uint256 public minimumUsd=50*1e18;
     address[] public funders; // Creating an Array of funders
     mapping(address=>uint256) public addressToAmountFunded;// mapping the funders to the amount they sent
+    address public owner;
+    constructor(){
+        owner=msg.sender;
+    }
     function fund() public  payable{
        // require(getConversionRate(msg.value) > 1e18,"Didn't Send enough"); //We want value to be greater than 50 USD
         require(msg.value.getConversionRate() > 1e18,"Didn't Send enough"); // when using library
@@ -13,7 +17,8 @@ contract FundMe{
         addressToAmountFunded[msg.sender]+=msg.value;
 
     }
-    function withdraw() public{
+    function withdraw() public onlyOwner{
+        require(msg.sender==owner,"Sender is not owner");
         for (uint256 funderIndex=0; funderIndex<funders.length; funderIndex++){
             address funder=funders[funderIndex];
             addressToAmountFunded[funder]=0;
@@ -22,9 +27,19 @@ contract FundMe{
         funders=new address[](0);
         // withdraw the funds
         //transfer
-        payable(msg.sender).transfer(address(this).balance);
+        // payable(msg.sender).transfer(address(this).balance);
+        // // send
+        // bool sendSucess=payable(msg.sender).send(address(this).balance);
+        // require(sendSucess,"Send Failed");
+        // call
+        // (bool callSucess,bytes memory dataReturned)=payable(msg.sender).call{value:address(this).balance}("");
+            (bool callSucess,)=payable(msg.sender).call{value:address(this).balance}("");
+            require(callSucess,"Call Falied");
     }
-   
+   modifier onlyOwner{
+       require(msg.sender==owner,"Sender is not owner!");
+       _; // rest of the code
+   }
 
    
 }
